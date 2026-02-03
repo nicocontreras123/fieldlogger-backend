@@ -8,6 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:5173',
+      'http://localhost:5174', // Added port 5174
       'http://localhost:4173',
       'https://fieldlogger-frontend-production.up.railway.app',
       /\.railway\.app$/ // Allow all railway subdomains (regex)

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { InspectionController } from './infrastructure/web/inspection.controller';
+import { InspectionEventsController } from './infrastructure/web/inspection-events.controller';
 import { CreateInspectionUseCase } from './application/create-inspection.use-case';
 import { DrizzleInspectionRepository } from './infrastructure/persistence/drizzle-inspection.repository';
 import { createDrizzleConnection } from './infrastructure/persistence/drizzle/db';
@@ -19,9 +20,10 @@ import { createDrizzleConnection } from './infrastructure/persistence/drizzle/db
  */
 @Module({
     imports: [ConfigModule],
-    controllers: [InspectionController],
+    controllers: [InspectionController, InspectionEventsController],
     providers: [
         CreateInspectionUseCase,
+        InspectionEventsController,
         {
             provide: 'DrizzleDB',
             useFactory: (configService: ConfigService) => {
@@ -41,7 +43,7 @@ import { createDrizzleConnection } from './infrastructure/persistence/drizzle/db
             inject: ['DrizzleDB'],
         },
     ],
-    exports: ['InspectionRepositoryPort'],
+    exports: ['InspectionRepositoryPort', InspectionEventsController],
 })
 export class InspectionModule { }
 

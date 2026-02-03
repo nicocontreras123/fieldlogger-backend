@@ -1,9 +1,9 @@
-import { Controller, Post, Get, Body, Param, UsePipes } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UsePipes, Inject } from '@nestjs/common';
 import { CreateInspectionUseCase } from '../../application/create-inspection.use-case';
 import type { InspectionRepositoryPort } from '../../domain/inspection.repository.port';
-import { Inject } from '@nestjs/common';
 import { ZodValidationPipe } from '../validation/zod-validation.pipe';
 import { createInspectionSchema, type CreateInspectionDto } from '../validation/inspection.schema';
+import { InspectionEventsController } from './inspection-events.controller';
 
 /**
  * Inspection Controller - Infrastructure Layer (Web Adapter)
@@ -17,12 +17,15 @@ export class InspectionController {
         private readonly createInspectionUseCase: CreateInspectionUseCase,
         @Inject('InspectionRepositoryPort')
         private readonly repository: InspectionRepositoryPort,
+        private readonly eventsController: InspectionEventsController,
     ) { }
 
     @Post()
     @UsePipes(new ZodValidationPipe(createInspectionSchema))
     async create(@Body() dto: CreateInspectionDto) {
         const inspection = await this.createInspectionUseCase.execute(dto);
+        // Broadcast update to all SSE clients
+        await this.eventsController.broadcastUpdate();
         return inspection.toJSON();
     }
 
