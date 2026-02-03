@@ -16,28 +16,11 @@ export class DrizzleInspectionRepository implements InspectionRepositoryPort {
     constructor(private readonly db: DrizzleDB) { }
 
     async save(inspection: Inspection): Promise<Inspection> {
-        // Check if inspection exists
-        const existing = await this.db
-            .select()
-            .from(inspections)
-            .where(eq(inspections.id, inspection.id))
-            .limit(1);
-
-        if (existing.length > 0) {
-            // Update existing
-            await this.db
-                .update(inspections)
-                .set({
-                    location: inspection.location,
-                    technician: inspection.technician,
-                    findings: inspection.findings,
-                    status: inspection.status,
-                    syncedAt: inspection.syncedAt ? new Date(inspection.syncedAt) : null,
-                })
-                .where(eq(inspections.id, inspection.id));
-        } else {
-            // Insert new
-            await this.db.insert(inspections).values({
+        // Atomic UPSERT (Insert or Update on Conflict)
+        // This handles race conditions and idempotent syncs perfectly
+        await this.db
+            .insert(inspections)
+            .values({
                 id: inspection.id,
                 location: inspection.location,
                 technician: inspection.technician,
@@ -45,8 +28,17 @@ export class DrizzleInspectionRepository implements InspectionRepositoryPort {
                 status: inspection.status,
                 createdAt: new Date(inspection.createdAt),
                 syncedAt: inspection.syncedAt ? new Date(inspection.syncedAt) : null,
+            })
+            .onConflictDoUpdate({
+                target: inspections.id,
+                set: {
+                    location: inspection.location,
+                    technician: inspection.technician,
+                    findings: inspection.findings,
+                    status: inspection.status,
+                    syncedAt: inspection.syncedAt ? new Date(inspection.syncedAt) : null,
+                },
             });
-        }
 
         return inspection;
     }
