@@ -35,7 +35,10 @@ import { createDrizzleConnection } from './infrastructure/persistence/drizzle/db
         },
         {
             provide: 'InspectionRepositoryPort',
-            useClass: DrizzleInspectionRepository,
+            useFactory: (db) => {
+                return new DrizzleInspectionRepository(db);
+            },
+            inject: ['DrizzleDB'],
         },
     ],
     exports: ['InspectionRepositoryPort'],
