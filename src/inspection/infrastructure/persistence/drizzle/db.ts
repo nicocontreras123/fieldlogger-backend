@@ -9,8 +9,10 @@ import * as schema from './schema';
  * This is configured via DATABASE_URL environment variable.
  */
 export function createDrizzleConnection(databaseUrl: string) {
+    const isProduction = process.env.NODE_ENV === 'production';
     const pool = new Pool({
         connectionString: databaseUrl,
+        ssl: isProduction ? { rejectUnauthorized: false } : undefined,
     });
 
     return drizzle(pool, { schema });
