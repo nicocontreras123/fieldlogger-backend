@@ -6,7 +6,12 @@ async function bootstrap() {
 
   // Enable CORS for PWA frontend
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'https://fieldlogger-frontend-production.up.railway.app',
+      /\.railway\.app$/ // Allow all railway subdomains (regex)
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
