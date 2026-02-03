@@ -9,10 +9,13 @@ import type { InspectionRepositoryPort } from '../../domain/inspection.repositor
  * Clients receive automatic updates when new inspections are created.
  * No additional libraries needed - uses native HTTP.
  */
+// Global store for SSE clients (shared across all instances)
+const globalClients: Response[] = [];
+
 @Controller('inspections/events')
 export class InspectionEventsController {
-    // Store active connections
-    private clients: Response[] = [];
+    // Use global clients array to ensure all instances share the same clients
+    private clients = globalClients;
 
     constructor(
         @Inject('InspectionRepositoryPort')

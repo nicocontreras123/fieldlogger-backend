@@ -23,7 +23,12 @@ import { createDrizzleConnection } from './infrastructure/persistence/drizzle/db
     controllers: [InspectionController, InspectionEventsController],
     providers: [
         CreateInspectionUseCase,
-        InspectionEventsController,
+        // InspectionEventsController is registered as a provider to ensure
+        // the same instance is used both as controller and for injection
+        {
+            provide: InspectionEventsController,
+            useClass: InspectionEventsController,
+        },
         {
             provide: 'DrizzleDB',
             useFactory: (configService: ConfigService) => {

@@ -10,6 +10,9 @@ export const createInspectionSchema = z.object({
     location: z.string().min(3, 'Location must be at least 3 characters'),
     technician: z.string().min(2, 'Technician name must be at least 2 characters'),
     findings: z.string().min(10, 'Findings must be at least 10 characters'),
+    status: z.enum(['pending', 'synced']).optional(),
+    createdAt: z.string().datetime().optional(),
+    syncedAt: z.string().datetime().optional(),
 });
 
 export type CreateInspectionDto = z.infer<typeof createInspectionSchema>;

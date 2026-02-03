@@ -3,7 +3,6 @@ import { CreateInspectionUseCase } from '../../application/create-inspection.use
 import type { InspectionRepositoryPort } from '../../domain/inspection.repository.port';
 import { ZodValidationPipe } from '../validation/zod-validation.pipe';
 import { createInspectionSchema, type CreateInspectionDto } from '../validation/inspection.schema';
-import { InspectionEventsController } from './inspection-events.controller';
 
 /**
  * Inspection Controller - Infrastructure Layer (Web Adapter)
@@ -17,15 +16,13 @@ export class InspectionController {
         private readonly createInspectionUseCase: CreateInspectionUseCase,
         @Inject('InspectionRepositoryPort')
         private readonly repository: InspectionRepositoryPort,
-        private readonly eventsController: InspectionEventsController,
     ) { }
 
     @Post()
     @UsePipes(new ZodValidationPipe(createInspectionSchema))
     async create(@Body() dto: CreateInspectionDto) {
         const inspection = await this.createInspectionUseCase.execute(dto);
-        // Broadcast update to all SSE clients
-        await this.eventsController.broadcastUpdate();
+        // Note: broadcast is now handled inside the use case to ensure all creations trigger updates
         return inspection.toJSON();
     }
 
